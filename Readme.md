@@ -5,11 +5,11 @@
 
 ## 実行画面
 
-ひっ算が表示するようにしました。
-![実行画面1](images/sample1.png)
+ひっ算が表示するようにしました。  
+![実行画面1](images/sample1.png)  
 
 テキスト欄をクリックで番号パッドが表示します。
-![実行画面1](images/sample2.png)
+![実行画面1](images/sample2.png)  
 
-繰り上がりのある場合のひっ算
-![実行画面1](images/sample3.png)
+繰り上がりのある場合のひっ算  
+![実行画面1](images/sample3.png)  
