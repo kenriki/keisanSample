@@ -13,3 +13,6 @@
 
 繰り上がりのある場合のひっ算  
 ![実行画面1](images/sample3.png)  
+
+シーケンス図
+![シーケンス図1](images/sequence1.png)
