@@ -10,32 +10,58 @@
 <body>
 	<h1>計算のページ</h1>
 
-	<button type="button" id="addRowButton">行を追加</button>
-	<br>
-
-	<form action="/calculate" method="post" id="calculationForm">
-
-		<div id="calculationRowsContainer">
-
-			<div class="calculation-row-group" id="group_1">
-				<div class="calculation-row">
-					<input type="text" id="number1_1" name="number1_1" placeholder="x=" readonly>
-
-					<span id="operator_1" data-operator="+">+</span>
-
-					<input type="text" id="number2_1" name="number2_1" placeholder="y=" readonly>
-					=
-					<input type="text" id="result_1" name="result_1" readonly>
-				</div>
-				<div id="process_1" class="calculation-process"></div>
-			</div>
-		</div>
+	<div id="topControls">
+		<button type="button" id="addRowButton">行を追加</button>
 
 		<div id="operators">
 			<button type="button" class="operator-btn selected" data-operator="+" id="op_add">+</button>
 			<button type="button" class="operator-btn" data-operator="-" id="op_subtract">-</button>
 			<button type="button" class="operator-btn" data-operator="*" id="op_multiply">×</button>
 			<button type="button" class="operator-btn" data-operator="/" id="op_divide">÷</button>
+		</div>
+	</div>
+
+	<form action="/calculate" method="post" id="calculationForm">
+
+		<div id="calculationRowsContainer">
+			<div class="calculation-row-group" id="group_1">
+
+				<div class="calculation-row">
+					<input type="text" id="number1_1" name="number1_1" value="211" placeholder="x=">
+
+					<span id="operator_1" data-operator="+">+</span>
+
+					<input type="text" id="number2_1" name="number2_1" value="78" placeholder="y=">
+					=
+					<input type="text" id="result_1" name="result_1" value="289">
+				</div>
+
+				<div id="process_1" class="calculation-process">
+					<div class="math-row carry-row" style="--cols: 3;">
+					</div>
+					<div class="math-row" style="--cols: 3;">
+						<div class="operator-cell"></div>
+						<div class="digit">2</div>
+						<div class="digit">1</div>
+						<div class="digit">1</div>
+					</div>
+					<div class="math-row" style="--cols: 3;">
+						<div class="operator-cell">+</div>
+						<div class="digit"></div>
+						<div class="digit">7</div>
+						<div class="digit">8</div>
+					</div>
+					<div class="horizontal-line" style="--cols: 3;">
+						<div class="line-area"></div>
+					</div>
+					<div class="math-row" style="--cols: 3;">
+						<div class="operator-cell"></div>
+						<div class="digit">2</div>
+						<div class="digit">8</div>
+						<div class="digit">9</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<button type="submit" id="calculateSubmit">計算</button>
@@ -57,8 +83,9 @@
 			<button data-value="." class="decimal-key">.</button>
 		</div>
 	</div>
+
 	<noscript>JavaScriptを有効にしてください。</noscript>
-    <script th:src="@{/js/app.js}"></script>
+	<script th:src="@{/js/app.js}"></script>
 </body>
 
 </html>

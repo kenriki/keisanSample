@@ -191,6 +191,7 @@ const Calculator = {
 		let html = '';
 
 		// 1. 最初の数 (X)
+		// ... [Xの行のHTML生成は変更なし] ...
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell"></div>`;
 		let paddedX = strX.padStart(maxCols, ' ');
@@ -199,7 +200,9 @@ const Calculator = {
 		}
 		html += `</div>`;
 
+
 		// 2. 2番目の数 (Y) と演算子
+		// ... [Yの行のHTML生成は変更なし] ...
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell">×</div>`;
 		let paddedY = strY.padStart(maxCols, ' ');
@@ -207,6 +210,7 @@ const Calculator = {
 			html += `<div class="digit">${paddedY[i] || ' '}</div>`;
 		}
 		html += `</div>`;
+
 
 		// 3. 中間線 (Yが1桁でない場合のみ)
 		if (maxLenY > 1) {
@@ -233,7 +237,9 @@ const Calculator = {
 			html += `</div>`;
 		}
 
-		// 5. 最終線
+		// 5. 最終線 (常に表示する)
+		// Yが1桁の場合、中間線はスキップされるため、この線が答えの直前の線になる。
+		// Yが多桁の場合、部分積の合計線になる。
 		html += `<div class="horizontal-line" ${gridStyle}><div class="operator-cell"></div><div class="line-area"></div></div>`;
 
 		// 6. 答えの行
@@ -264,21 +270,21 @@ const Calculator = {
 			processElement.innerHTML = '<div>正の数のみ対応しています。</div>';
 			return;
 		}
-        
+
 		const initialY = y;
 		let strX = String(x);
 		const decimalPlaces = 2; // 小数点以下2桁まで計算
-		
+
 		let originalDecimalPointIndex = strX.indexOf('.');
 		if (originalDecimalPointIndex === -1) {
 			originalDecimalPointIndex = strX.length;
 		}
 
-        // 割られる数の準備: ドットを取り除き、計算用の0を追加
-        let rawDividend = strX.replace('.', '');
-		
+		// 割られる数の準備: ドットを取り除き、計算用の0を追加
+		let rawDividend = strX.replace('.', '');
+
 		// 小数点以下の計算のために '0' を追加
-		rawDividend += '0'.repeat(decimalPlaces); 
+		rawDividend += '0'.repeat(decimalPlaces);
 
 		let currentRemainder = 0;
 		let quotientDigits = [];
@@ -286,178 +292,178 @@ const Calculator = {
 		let dividendIndex = 0; // rawDividendの現在処理中の桁のインデックス
 
 		let quotientHasStarted = false; // 商のゼロを無視するためのフラグ
-        let finalRemainder = 0;
-        let isDecimalPhase = false;
+		let finalRemainder = 0;
+		let isDecimalPhase = false;
 
-        // 計算ループ: 商の各桁を計算
+		// 計算ループ: 商の各桁を計算
 		while (dividendIndex < rawDividend.length) {
-            
-            let workingDividend = currentRemainder * 10;
-            
-            // 新しく引き下ろす桁をWorking Dividendに追加
-            workingDividend += parseInt(rawDividend[dividendIndex], 10);
-            
-            let qDigit = Math.floor(workingDividend / initialY);
-            let product = qDigit * initialY;
-            currentRemainder = workingDividend - product;
-            
-            // 商の桁が小数点を超えるかどうかのチェック
-            if (dividendIndex === originalDecimalPointIndex) {
-                quotientDigits.push('.');
-                isDecimalPhase = true;
-            }
-            
-            // 商の桁の記録と、ゼロのスキップ処理
-            if (qDigit > 0 || quotientHasStarted || isDecimalPhase) {
-                quotientDigits.push(String(qDigit));
-                quotientHasStarted = true;
-            } else {
-                // 商の先頭の0はスキップし、位置合わせのために' 'をプッシュ
-                quotientDigits.push(' ');
-            }
-            
-            // 有効な計算ステップ（商が0より大きいか、小数点計算中）の場合のみ記録
-            if (qDigit > 0 || (quotientHasStarted && product > 0)) {
-                
-                // 部分積の開始桁位置を特定
-                let productEndIndex = dividendIndex + 1; // rawDividend基準
-                let productStr = String(product);
-                
-                steps.push({
-                    productStr: productStr,
-                    productEndIndex: productEndIndex,
-                    remainderStr: String(currentRemainder),
-                    currentDividendEndIndex: dividendIndex + 1
-                });
-            }
 
-            // 小数点以下2桁目の計算が終わったら終了
-            if (isDecimalPhase && dividendIndex >= originalDecimalPointIndex + decimalPlaces - 1) {
-                finalRemainder = currentRemainder;
-                break;
-            }
-            
-            // 割り切れたら終了
-            if (dividendIndex >= originalDecimalPointIndex && currentRemainder === 0) {
-                finalRemainder = 0;
-                break;
-            }
-            
+			let workingDividend = currentRemainder * 10;
+
+			// 新しく引き下ろす桁をWorking Dividendに追加
+			workingDividend += parseInt(rawDividend[dividendIndex], 10);
+
+			let qDigit = Math.floor(workingDividend / initialY);
+			let product = qDigit * initialY;
+			currentRemainder = workingDividend - product;
+
+			// 商の桁が小数点を超えるかどうかのチェック
+			if (dividendIndex === originalDecimalPointIndex) {
+				quotientDigits.push('.');
+				isDecimalPhase = true;
+			}
+
+			// 商の桁の記録と、ゼロのスキップ処理
+			if (qDigit > 0 || quotientHasStarted || isDecimalPhase) {
+				quotientDigits.push(String(qDigit));
+				quotientHasStarted = true;
+			} else {
+				// 商の先頭の0はスキップし、位置合わせのために' 'をプッシュ
+				quotientDigits.push(' ');
+			}
+
+			// 有効な計算ステップ（商が0より大きいか、小数点計算中）の場合のみ記録
+			if (qDigit > 0 || (quotientHasStarted && product > 0)) {
+
+				// 部分積の開始桁位置を特定
+				let productEndIndex = dividendIndex + 1; // rawDividend基準
+				let productStr = String(product);
+
+				steps.push({
+					productStr: productStr,
+					productEndIndex: productEndIndex,
+					remainderStr: String(currentRemainder),
+					currentDividendEndIndex: dividendIndex + 1
+				});
+			}
+
+			// 小数点以下2桁目の計算が終わったら終了
+			if (isDecimalPhase && dividendIndex >= originalDecimalPointIndex + decimalPlaces - 1) {
+				finalRemainder = currentRemainder;
+				break;
+			}
+
+			// 割り切れたら終了
+			if (dividendIndex >= originalDecimalPointIndex && currentRemainder === 0) {
+				finalRemainder = 0;
+				break;
+			}
+
 			dividendIndex++;
 		}
-        
-        // 最終的な商と余りの表示調整
-        let finalQuotientDisplay = quotientDigits.join('');
-        
-        // 商の表示用のパディング
-        let strQforDisplay = finalQuotientDisplay.replace(/^[ ]+/, ''); // 先頭の空白を削除
+
+		// 最終的な商と余りの表示調整
+		let finalQuotientDisplay = quotientDigits.join('');
+
+		// 商の表示用のパディング
+		let strQforDisplay = finalQuotientDisplay.replace(/^[ ]+/, ''); // 先頭の空白を削除
 
 		// 筆算の最大幅を決定 (割られる数 + 割り切れない場合の '...' のための余裕)
 		const maxTotalCols = rawDividend.length + 1;
 		let maxStepsWidth = maxTotalCols * 1.1 + 10;
-        
-        // --- 1. 商のHTML生成 ---
+
+		// --- 1. 商のHTML生成 ---
 		let quotientHTML = '';
-        let quotientOffset = 0; // 割られる数に対する商の開始オフセット
-        
-        let cleanedDividend = rawDividend;
-        
-        // 商のゼロは一つだけ表示する
-        let qStart = strQforDisplay.indexOf('.'); 
-        if(qStart === -1) qStart = strQforDisplay.length;
-        
-        quotientOffset = originalDecimalPointIndex - qStart;
-        
-        // 商の桁を割られる数の桁に正確に合わせるためのパディング
-        quotientHTML += '<div style="flex-grow: 1;"></div>';
+		let quotientOffset = 0; // 割られる数に対する商の開始オフセット
+
+		let cleanedDividend = rawDividend;
+
+		// 商のゼロは一つだけ表示する
+		let qStart = strQforDisplay.indexOf('.');
+		if (qStart === -1) qStart = strQforDisplay.length;
+
+		quotientOffset = originalDecimalPointIndex - qStart;
+
+		// 商の桁を割られる数の桁に正確に合わせるためのパディング
+		quotientHTML += '<div style="flex-grow: 1;"></div>';
 		for (let i = 0; i < quotientOffset; i++) {
-			quotientHTML += `<div class="quotient-digit"></div>`; 
+			quotientHTML += `<div class="quotient-digit"></div>`;
 		}
-        
+
 		for (const digit of strQforDisplay.split('')) {
 			quotientHTML += `<div class="quotient-digit">${digit === '.' ? '.' : digit}</div>`;
 		}
-        
-        // --- 2. ステップのHTML生成 ---
-        let stepsHTML = '';
-        let currentDivIndex = 0;
-        
-        for (let i = 0; i < steps.length; i++) {
-            const step = steps[i];
-            
-            // A. 引く数 (Product) の行
-            let productEndIndex = step.productEndIndex;
-            let productStr = step.productStr;
-            
-            // Product の開始位置 (rawDividend基準)
-            let productStartCol = productEndIndex - productStr.length;
-            let productPadding = ' '.repeat(productStartCol);
 
-            stepsHTML += `<div class="step-row">`;
-            stepsHTML += `<div class="step-content" style="width: 100%;">`;
-            stepsHTML += `<span class="step-operator">-</span>`;
-            stepsHTML += `<span style="flex-grow: 1; text-align: right; padding-right: 0.5em;">${productPadding}${productStr}</span>`;
-            stepsHTML += `</div>`;
-            stepsHTML += `</div>`;
-            
-            // B. 線
-            stepsHTML += `<div class="step-row"><div class="step-line"></div></div>`;
-            
-            // C. 引き算の結果 (Remainder) + 新しく引き下ろす次の桁
-            let remainderStr = step.remainderStr;
-            let nextDigit = rawDividend[productEndIndex];
-            
-            // 余り(resultStr)が配置される開始桁
-            const remainderStartCol = productEndIndex - remainderStr.length;
-            let remainderPadding = ' '.repeat(remainderStartCol);
+		// --- 2. ステップのHTML生成 ---
+		let stepsHTML = '';
+		let currentDivIndex = 0;
 
-            stepsHTML += `<div class="step-row">`;
-            stepsHTML += `<div class="step-content" style="width: 100%;">`;
-            stepsHTML += `<span style="flex-grow: 1; text-align: right; padding-right: 0.5em;">${remainderPadding}${remainderStr}${nextDigit !== undefined ? nextDigit : ''}</span>`;
-            stepsHTML += `</div>`;
-            stepsHTML += `</div>`;
-        }
+		for (let i = 0; i < steps.length; i++) {
+			const step = steps[i];
 
-        // --- 3. 割り算全体構造のHTML構築 ---
-        
-        // 表示用の割られる数 (小数点付き)
-        let dividendForDisplay = x;
-        if (rawDividend.length > String(x).replace('.', '').length) {
-            // 計算のために0を追加した場合、表示にも小数点と0を追加
-            dividendForDisplay = String(x) + '.0'.repeat(decimalPlaces);
-            // 余分な小数点と0を削除して、必要な表示に調整
-            let tempDiv = String(x).split('.');
-            if (tempDiv.length === 1) {
-                dividendForDisplay = tempDiv[0] + '.' + '0'.repeat(decimalPlaces);
-            } else {
-                dividendForDisplay = tempDiv[0] + '.' + (tempDiv[1] + '0'.repeat(decimalPlaces)).slice(0, decimalPlaces);
-            }
-        }
-        
-        // 最終結果の表示（resultInputの値と合わせる）
-        const finalResultQ = (x / y).toFixed(decimalPlaces);
+			// A. 引く数 (Product) の行
+			let productEndIndex = step.productEndIndex;
+			let productStr = step.productStr;
+
+			// Product の開始位置 (rawDividend基準)
+			let productStartCol = productEndIndex - productStr.length;
+			let productPadding = ' '.repeat(productStartCol);
+
+			stepsHTML += `<div class="step-row">`;
+			stepsHTML += `<div class="step-content" style="width: 100%;">`;
+			stepsHTML += `<span class="step-operator">-</span>`;
+			stepsHTML += `<span style="flex-grow: 1; text-align: right; padding-right: 0.5em;">${productPadding}${productStr}</span>`;
+			stepsHTML += `</div>`;
+			stepsHTML += `</div>`;
+
+			// B. 線
+			stepsHTML += `<div class="step-row"><div class="step-line"></div></div>`;
+
+			// C. 引き算の結果 (Remainder) + 新しく引き下ろす次の桁
+			let remainderStr = step.remainderStr;
+			let nextDigit = rawDividend[productEndIndex];
+
+			// 余り(resultStr)が配置される開始桁
+			const remainderStartCol = productEndIndex - remainderStr.length;
+			let remainderPadding = ' '.repeat(remainderStartCol);
+
+			stepsHTML += `<div class="step-row">`;
+			stepsHTML += `<div class="step-content" style="width: 100%;">`;
+			stepsHTML += `<span style="flex-grow: 1; text-align: right; padding-right: 0.5em;">${remainderPadding}${remainderStr}${nextDigit !== undefined ? nextDigit : ''}</span>`;
+			stepsHTML += `</div>`;
+			stepsHTML += `</div>`;
+		}
+
+		// --- 3. 割り算全体構造のHTML構築 ---
+
+		// 表示用の割られる数 (小数点付き)
+		let dividendForDisplay = x;
+		if (rawDividend.length > String(x).replace('.', '').length) {
+			// 計算のために0を追加した場合、表示にも小数点と0を追加
+			dividendForDisplay = String(x) + '.0'.repeat(decimalPlaces);
+			// 余分な小数点と0を削除して、必要な表示に調整
+			let tempDiv = String(x).split('.');
+			if (tempDiv.length === 1) {
+				dividendForDisplay = tempDiv[0] + '.' + '0'.repeat(decimalPlaces);
+			} else {
+				dividendForDisplay = tempDiv[0] + '.' + (tempDiv[1] + '0'.repeat(decimalPlaces)).slice(0, decimalPlaces);
+			}
+		}
+
+		// 最終結果の表示（resultInputの値と合わせる）
+		const finalResultQ = (x / y).toFixed(decimalPlaces);
 
 		let html = `
-			<div class="division-container" style="min-width: ${maxStepsWidth}em;">
-				<div class="quotient-row" style="min-width: ${maxStepsWidth - 10}em;">
-					${quotientHTML}
-				</div>
-				<div class="division-main">
-					<div class="division-symbol">${initialY}</div>
-					<div class="division-steps" style="min-width: ${maxStepsWidth - 10}em;">
-						<div class="step-row">
-							<div class="step-content" style="width: 100%; justify-content: flex-start; padding-left: 0.5em;">${dividendForDisplay}</div>
-						</div>
-						
-						${stepsHTML}
-						
-						<div class="remainder-line" style="text-align: right; padding-right: 0.5em;">...</div>
-					</div>
-				</div>
-				<div style="text-align: left; margin-top: 10px; width: 100%; padding-left: 0.5em;">商: ${finalResultQ}</div>
-			</div>
-		`;
+		    <div class="division-container">
+		        <div class="quotient-row">
+		            <div class="quotient-placeholder"></div>
+		            <div class="quotient-content">${strQforDisplay}</div>
+		        </div>
 		
+		        <div class="division-main">
+		            <div class="division-symbol">${initialY}</div>
+		            <div class="division-steps-container">
+		                <div class="step-dividend">${dividendForDisplay}</div>
+		                
+		                ${stepsHTML}
+		                
+		                <div class="remainder-line">...</div>
+		            </div>
+		        </div>
+		        <div class="division-result-summary">商: ${finalResultQ}</div>
+		    </div>
+		`;
+
 		processElement.innerHTML = html;
 	},
 

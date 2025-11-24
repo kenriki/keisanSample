@@ -1,227 +1,385 @@
-		/* --- 既存スタイル (省略) --- */
-		#keypad {
-			position: absolute;
-			padding: 10px;
-			background-color: #f0f0f0;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			z-index: 100;
-		}
+/* ---------------------------------------------------- */
+/* 1. 全体レイアウトとフォームコンテナ */
+/* ---------------------------------------------------- */
+body {
+	font-family: 'Arial', sans-serif;
+	margin: 20px;
+	background-color: #f4f7f9;
+}
 
-		.keypad-hidden {
-			display: none;
-		}
+h1 {
+	color: #2c3e50;
+	border-bottom: 3px solid #3498db;
+	padding-bottom: 10px;
+	margin-bottom: 20px;
+}
 
-		.keypad-grid {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 5px;
-		}
+/* フォームとコントロールエリアを中央に寄せる */
+#calculationForm {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-		#keypad button {
-			padding: 15px;
-			font-size: 18px;
-			cursor: pointer;
-			border: none;
-			background-color: #fff;
-			border-radius: 3px;
-			transition: background-color 0.2s;
-		}
+/* 2. 計算行と入力フィールド */
+.calculation-row-group {
+	margin-bottom: 20px;
+	padding: 15px;
+	border-radius: 5px;
+	background-color: #fafafa;
+}
 
-		#operators {
-			margin-top: 10px;
-			display: flex;
-			gap: 5px;
-			width: fit-content;
-		}
+.calculation-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 5px;
+	gap: 10px;
+	flex-wrap: wrap;
+}
 
-		.operator-btn {
-			padding: 10px 15px;
-			font-size: 18px;
-			cursor: pointer;
-			border: 1px solid #ccc;
-			background-color: #e9e9e9;
-			border-radius: 3px;
-			flex-grow: 0;
-			width: auto;
-		}
+.calculation-row input[type="text"] {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	text-align: right;
+	width: 120px;
+	box-sizing: border-box;
+}
 
-		.operator-btn.selected {
-			background-color: #007bff;
-			color: white;
-			border-color: #0056b3;
-			font-weight: bold;
-		}
+.calculation-row span {
+	font-weight: bold;
+	font-size: 18px;
+	color: #34495e;
+}
 
-		.calculation-row-group {
-			margin-bottom: 10px;
-		}
+/* 3. トップコントロールエリア (行追加ボタンと演算子ボタン) */
 
-		.calculation-row input[type="text"] {
-			width: 100px;
-		}
+/* 💡 新規: 行追加ボタンと演算子ボタンを並べるコンテナ */
+#topControls {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 auto 15px auto;
+	max-width: 600px;
+	/* フォームの幅に合わせる */
+	padding: 0 20px;
+}
 
-		.calculation-row {
-			display: flex;
-			align-items: center;
-			margin-bottom: 5px;
-			gap: 5px;
-		}
+#addRowButton {
+	padding: 8px 15px;
+	font-size: 14px;
+	background-color: #2ecc71;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	margin-bottom: 0;
+	/* topControls内で制御 */
+	display: block;
+}
 
-		.calculation-row span {
-			font-weight: bold;
-		}
+#addRowButton:hover {
+	background-color: #27ae60;
+}
 
-		/* 筆算表示領域のスタイル */
-		.calculation-process {
-			margin-left: 0;
-			padding-left: 0;
-			display: flex;
-			flex-direction: column;
-			align-items: flex-start;
-			font-size: 18px;
-			color: #333;
-			width: fit-content;
-		}
+/* 💡 修正: #operatorsの配置をインライン化 */
+#operators {
+	margin-top: 0;
+	display: flex;
+	gap: 5px;
+	width: auto;
+	justify-content: flex-start;
+}
 
-		.math-row {
-			display: grid;
-			grid-template-columns: 20px repeat(var(--cols), 1fr);
-			font-family: monospace;
-			line-height: 1.2;
-		}
+.operator-btn {
+	padding: 8px 12px;
+	/* パディングを小さく */
+	font-size: 16px;
+	/* フォントサイズを小さく */
+	cursor: pointer;
+	border: 1px solid #bdc3c7;
+	background-color: #ecf0f1;
+	border-radius: 5px;
+	flex-grow: 0;
+	max-width: 60px;
+	/* 最大幅を制限しすぎないように調整 */
+	box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+}
 
-		.digit {
-			text-align: center;
-			min-width: 1.1em;
-		}
+.operator-btn:hover:not(.selected) {
+	background-color: #dce0e3;
+}
 
-		.operator-cell {
-			grid-column: 1;
-			text-align: center;
-			font-weight: bold;
-		}
+.operator-btn.selected {
+	background-color: #3498db;
+	color: white;
+	border-color: #2980b9;
+	font-weight: bold;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-		/* 加算・減算・乗算の線 */
-		.horizontal-line {
-			display: grid;
-			grid-template-columns: 20px repeat(var(--cols), 1fr);
-			width: 100%;
-			margin-top: -2px;
-			margin-bottom: 2px;
-		}
+#calculateSubmit {
+	display: block;
+	width: 100%;
+	padding: 15px;
+	font-size: 20px;
+	background-color: #e74c3c;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	margin-top: 20px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-		.line-area {
-			grid-column: 2 / span var(--cols);
-			border-bottom: 2px solid #333;
-		}
+#calculateSubmit:hover {
+	background-color: #c0392b;
+}
 
-		.carry-row .digit {
-			font-size: 12px;
-			line-height: 1;
-			min-height: 12px;
-			color: red;
-		}
+/* 4. キーパッドの改善 */
+#keypad {
+	margin-top: 25px;
+	padding: 15px;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	z-index: 10;
+	max-width: 300px;
+	margin-left: auto;
+	margin-right: auto;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
-		.multiplication-line {
-			display: grid;
-			grid-template-columns: 20px repeat(var(--cols), 1fr);
-			width: 100%;
-			margin-top: -2px;
-			margin-bottom: 2px;
-		}
+.keypad-hidden {
+	display: none;
+}
 
-		.multiplication-line .line-area {
-			grid-column: 2 / span var(--cols);
-			border-bottom: 1px solid #777;
-		}
+.keypad-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+}
 
-		/* --- 割り算専用スタイル 💡 修正 --- */
-		.division-container {
-			display: flex;
-			flex-direction: column;
-			align-items: flex-start;
-			font-family: monospace;
-			font-size: 18px;
-			/* 割り算のレイアウト全体の幅を調整 */
-			max-width: 300px;
-		}
+#keypad button {
+	padding: 18px;
+	font-size: 22px;
+	cursor: pointer;
+	border: 1px solid #ddd;
+	background-color: #f9f9f9;
+	border-radius: 5px;
+	transition: background-color 0.2s;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
 
-		.quotient-row {
-			border-bottom: 2px solid #333;
-			padding-bottom: 2px;
-			min-height: 1.2em;
-			margin-left: 10px;
-			display: flex;
-			/* 商をフレックスで配置 */
-			justify-content: flex-end;
-			width: 100%;
-		}
+#keypad button:hover {
+	background-color: #e8e8e8;
+}
 
-		.quotient-digit {
-			min-width: 1.1em;
-			text-align: center;
-		}
+.clear-key {
+	background-color: #f39c12 !important;
+	color: white;
+	border-color: #e67e22;
+}
 
-		.division-main {
-			display: flex;
-			align-items: flex-start;
-		}
+.clear-key:hover {
+	background-color: #e67e22 !important;
+}
 
-		.division-symbol {
-			border-left: 2px solid #333;
-			border-bottom: 2px solid #333;
-			padding-left: 5px;
-			padding-right: 5px;
-			line-height: 1.2;
-			margin-top: -2px;
-			font-weight: bold;
-			min-height: 1.2em;
-		}
+.decimal-key {
+	background-color: #bdc3c7;
+	border-color: #95a5a6;
+}
 
-		.division-steps {
-			display: flex;
-			flex-direction: column;
-			margin-left: 5px;
-			min-width: 100px;
-		}
+.decimal-key:hover {
+	background-color: #95a5a6;
+}
 
-		.step-row {
-			display: flex;
-			/* 右寄せを維持するためflex-end */
-			justify-content: flex-end;
-			width: 100%;
-			line-height: 1.2;
-		}
+/* ---------------------------------------------------- */
+/* 5. 筆算表示 (加算/減算/乗算) */
+/* ---------------------------------------------------- */
+.calculation-process {
+	margin: 15px auto 0 auto;
+	padding-left: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	font-size: 18px;
+	color: #333;
+	width: fit-content;
+	min-width: 100px;
+}
 
-		/* 割られる数、引き算の行 */
-		.step-content {
-			display: flex;
-			justify-content: flex-end;
-			min-width: 100px;
-		}
+.math-row {
+	display: grid;
+	/* 演算子セル(20px) + 桁の数だけ1fr */
+	grid-template-columns: 20px repeat(var(--cols), 1fr);
+	font-family: monospace;
+	line-height: 1.2;
+}
 
-		.step-digit {
-			min-width: 1.1em;
-			text-align: center;
-		}
+.digit {
+	text-align: center;
+	min-width: 1.1em;
+}
 
-		.step-operator {
-			min-width: 1.1em;
-			text-align: right;
-			font-weight: bold;
-		}
+.operator-cell {
+	grid-column: 1;
+	text-align: center;
+	font-weight: bold;
+}
 
-		.step-line {
-			border-bottom: 1px solid #777;
-			margin-top: -2px;
-			margin-bottom: 2px;
-			width: 100%;
-		}
+/* 桁上がり行のスタイル */
+.carry-row .digit {
+	font-size: 12px;
+	line-height: 1;
+	min-height: 12px;
+	color: red;
+}
 
-		.remainder-line {
-			padding-top: 5px;
-			font-weight: bold;
-			width: 100%;
-			text-align: right;
-		}
+/* 加算・減算・乗算の最終線 */
+.horizontal-line {
+	display: grid;
+	grid-template-columns: 20px repeat(var(--cols), 1fr);
+	width: 100%;
+	margin-top: -2px;
+	margin-bottom: 2px;
+}
+
+.line-area {
+	grid-column: 2 / span var(--cols);
+	border-bottom: 2px solid #333;
+}
+
+/* 乗算の中間線 */
+.multiplication-line {
+	display: grid;
+	grid-template-columns: 20px repeat(var(--cols), 1fr);
+	width: 100%;
+	margin-top: -2px;
+	margin-bottom: 2px;
+}
+
+/* 乗算の中間線は細い線 */
+.multiplication-line .line-area {
+	grid-column: 2 / span var(--cols);
+	border-bottom: 1px solid #777;
+}
+
+/* ---------------------------------------------------- */
+/* 6. 筆算表示 (割り算) */
+/* ---------------------------------------------------- */
+
+.division-container {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	font-family: monospace;
+	font-size: 18px;
+	width: fit-content;
+	margin: 0 auto;
+	padding: 10px 0;
+}
+
+/* メインの割る数/割られる数エリア */
+.division-main {
+	display: flex;
+	align-items: flex-start;
+	min-width: 100px;
+}
+
+/* 割る数の記号 (L字型) */
+.division-symbol {
+	border-left: 2px solid #333;
+	padding-right: 5px;
+	line-height: 1.2;
+	margin-top: 0;
+	font-weight: normal;
+	min-height: 2em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ステップ全体を囲むコンテナ */
+.division-steps-container {
+	display: flex;
+	flex-direction: column;
+	margin-left: 5px;
+	width: fit-content;
+	border-top: 2px solid #333;
+	/* 商の下の横線 */
+	padding-bottom: 5px;
+}
+
+/* 商の行 (割られる数の上に表示) */
+.quotient-row {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+	/* 割られる数と重なるように上に移動 */
+	margin-bottom: -1.2em;
+	padding-right: 5px;
+}
+
+/* 最初の割られる数（一番上の数） */
+.step-dividend {
+	padding-left: 0.5em;
+	line-height: 1.2;
+}
+
+/* 各ステップの行 (引く数、余り) */
+.step-row {
+	display: grid;
+	grid-template-columns: 15px 1fr;
+	line-height: 1.2;
+	width: 100%;
+	padding-left: 0.5em;
+	box-sizing: border-box;
+}
+
+.product-row .step-operator {
+	grid-column: 1;
+	text-align: center;
+	font-weight: bold;
+}
+
+/* 桁揃えのための値表示 (Product, Remainder) */
+.step-value {
+	grid-column: 2;
+	/* JSで計算されたpaddingを適用 */
+	padding-left: var(--padding-left, 0em);
+	display: block;
+	text-align: left;
+}
+
+/* 線 */
+.step-line-row {
+	grid-template-columns: 1fr;
+	margin-top: -2px;
+	margin-bottom: 2px;
+	padding-left: 15px;
+	/* 演算子列を避ける */
+}
+
+.step-line {
+	border-bottom: 1px solid #777;
+	width: 100%;
+}
+
+.remainder-line {
+	padding-top: 5px;
+	font-weight: bold;
+	text-align: right;
+	padding-right: 0.5em;
+}
+
+.division-result-summary {
+	margin-top: 10px;
+	width: 100%;
+	text-align: left;
+	padding-left: 10px;
+}
