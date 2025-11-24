@@ -1,0 +1,227 @@
+		/* --- 既存スタイル (省略) --- */
+		#keypad {
+			position: absolute;
+			padding: 10px;
+			background-color: #f0f0f0;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			z-index: 100;
+		}
+
+		.keypad-hidden {
+			display: none;
+		}
+
+		.keypad-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 5px;
+		}
+
+		#keypad button {
+			padding: 15px;
+			font-size: 18px;
+			cursor: pointer;
+			border: none;
+			background-color: #fff;
+			border-radius: 3px;
+			transition: background-color 0.2s;
+		}
+
+		#operators {
+			margin-top: 10px;
+			display: flex;
+			gap: 5px;
+			width: fit-content;
+		}
+
+		.operator-btn {
+			padding: 10px 15px;
+			font-size: 18px;
+			cursor: pointer;
+			border: 1px solid #ccc;
+			background-color: #e9e9e9;
+			border-radius: 3px;
+			flex-grow: 0;
+			width: auto;
+		}
+
+		.operator-btn.selected {
+			background-color: #007bff;
+			color: white;
+			border-color: #0056b3;
+			font-weight: bold;
+		}
+
+		.calculation-row-group {
+			margin-bottom: 10px;
+		}
+
+		.calculation-row input[type="text"] {
+			width: 100px;
+		}
+
+		.calculation-row {
+			display: flex;
+			align-items: center;
+			margin-bottom: 5px;
+			gap: 5px;
+		}
+
+		.calculation-row span {
+			font-weight: bold;
+		}
+
+		/* 筆算表示領域のスタイル */
+		.calculation-process {
+			margin-left: 0;
+			padding-left: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			font-size: 18px;
+			color: #333;
+			width: fit-content;
+		}
+
+		.math-row {
+			display: grid;
+			grid-template-columns: 20px repeat(var(--cols), 1fr);
+			font-family: monospace;
+			line-height: 1.2;
+		}
+
+		.digit {
+			text-align: center;
+			min-width: 1.1em;
+		}
+
+		.operator-cell {
+			grid-column: 1;
+			text-align: center;
+			font-weight: bold;
+		}
+
+		/* 加算・減算・乗算の線 */
+		.horizontal-line {
+			display: grid;
+			grid-template-columns: 20px repeat(var(--cols), 1fr);
+			width: 100%;
+			margin-top: -2px;
+			margin-bottom: 2px;
+		}
+
+		.line-area {
+			grid-column: 2 / span var(--cols);
+			border-bottom: 2px solid #333;
+		}
+
+		.carry-row .digit {
+			font-size: 12px;
+			line-height: 1;
+			min-height: 12px;
+			color: red;
+		}
+
+		.multiplication-line {
+			display: grid;
+			grid-template-columns: 20px repeat(var(--cols), 1fr);
+			width: 100%;
+			margin-top: -2px;
+			margin-bottom: 2px;
+		}
+
+		.multiplication-line .line-area {
+			grid-column: 2 / span var(--cols);
+			border-bottom: 1px solid #777;
+		}
+
+		/* --- 割り算専用スタイル 💡 修正 --- */
+		.division-container {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			font-family: monospace;
+			font-size: 18px;
+			/* 割り算のレイアウト全体の幅を調整 */
+			max-width: 300px;
+		}
+
+		.quotient-row {
+			border-bottom: 2px solid #333;
+			padding-bottom: 2px;
+			min-height: 1.2em;
+			margin-left: 10px;
+			display: flex;
+			/* 商をフレックスで配置 */
+			justify-content: flex-end;
+			width: 100%;
+		}
+
+		.quotient-digit {
+			min-width: 1.1em;
+			text-align: center;
+		}
+
+		.division-main {
+			display: flex;
+			align-items: flex-start;
+		}
+
+		.division-symbol {
+			border-left: 2px solid #333;
+			border-bottom: 2px solid #333;
+			padding-left: 5px;
+			padding-right: 5px;
+			line-height: 1.2;
+			margin-top: -2px;
+			font-weight: bold;
+			min-height: 1.2em;
+		}
+
+		.division-steps {
+			display: flex;
+			flex-direction: column;
+			margin-left: 5px;
+			min-width: 100px;
+		}
+
+		.step-row {
+			display: flex;
+			/* 右寄せを維持するためflex-end */
+			justify-content: flex-end;
+			width: 100%;
+			line-height: 1.2;
+		}
+
+		/* 割られる数、引き算の行 */
+		.step-content {
+			display: flex;
+			justify-content: flex-end;
+			min-width: 100px;
+		}
+
+		.step-digit {
+			min-width: 1.1em;
+			text-align: center;
+		}
+
+		.step-operator {
+			min-width: 1.1em;
+			text-align: right;
+			font-weight: bold;
+		}
+
+		.step-line {
+			border-bottom: 1px solid #777;
+			margin-top: -2px;
+			margin-bottom: 2px;
+			width: 100%;
+		}
+
+		.remainder-line {
+			padding-top: 5px;
+			font-weight: bold;
+			width: 100%;
+			text-align: right;
+		}
