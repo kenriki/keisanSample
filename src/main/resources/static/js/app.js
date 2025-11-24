@@ -1,4 +1,3 @@
-
 const Calculator = {
 	// =======================================================
 	// 1. 状態と要素の定義
@@ -13,10 +12,11 @@ const Calculator = {
 	// ------------------------------------------------------------------
 	// ユーティリティ (桁揃えHTML生成)
 	// ------------------------------------------------------------------
-	generateMathHTML(operator, strX, strY, finalResult, carriesOrBorrows) {
-		const numCols = finalResult.length;
+	// 💡 修正: maxCols (筆算の最大桁数) を引数に追加
+	generateMathHTML(maxCols, operator, strX, strY, finalResult, carriesOrBorrows) {
 		let html = '';
-		const gridStyle = `style="--cols: ${numCols}"`;
+		// 💡 修正: Gridスタイルに maxCols を使用
+		const gridStyle = `style="--cols: ${maxCols}"`;
 
 		// 1. 繰り上がり/繰り下がりの行
 		if (carriesOrBorrows && carriesOrBorrows.some(c => c !== '')) {
@@ -24,8 +24,9 @@ const Calculator = {
 			html += `<div class="math-row carry-row" ${gridStyle}>`;
 			html += `<div class="operator-cell"></div>`;
 
-			const paddedCarry = carryRow.padStart(numCols, ' ');
-			for (let i = 0; i < numCols; i++) {
+			// 💡 修正: パディングに maxCols を使用
+			const paddedCarry = carryRow.padStart(maxCols, ' ');
+			for (let i = 0; i < maxCols; i++) {
 				html += `<div class="digit">${paddedCarry[i] === ' ' ? '' : paddedCarry[i]}</div>`;
 			}
 			html += `</div>`;
@@ -35,8 +36,9 @@ const Calculator = {
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell"></div>`;
 
-		const paddedX = strX.padStart(numCols, ' ');
-		for (let i = 0; i < numCols; i++) {
+		// 💡 修正: パディングに maxCols を使用
+		const paddedX = strX.padStart(maxCols, ' ');
+		for (let i = 0; i < maxCols; i++) {
 			html += `<div class="digit">${paddedX[i]}</div>`;
 		}
 		html += `</div>`;
@@ -45,8 +47,9 @@ const Calculator = {
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell">${operator}</div>`;
 
-		const paddedY = strY.padStart(numCols, ' ');
-		for (let i = 0; i < numCols; i++) {
+		// 💡 修正: パディングに maxCols を使用
+		const paddedY = strY.padStart(maxCols, ' ');
+		for (let i = 0; i < maxCols; i++) {
 			html += `<div class="digit">${paddedY[i]}</div>`;
 		}
 		html += `</div>`;
@@ -58,8 +61,10 @@ const Calculator = {
 		html += `<div class="math-row answer-row" ${gridStyle}>`;
 		html += `<div class="operator-cell"></div>`;
 
-		for (let i = 0; i < numCols; i++) {
-			html += `<div class="digit">${finalResult[i]}</div>`;
+		// 💡 修正: パディングに maxCols を使用
+		const paddedResult = finalResult.padStart(maxCols, ' ');
+		for (let i = 0; i < maxCols; i++) {
+			html += `<div class="digit">${paddedResult[i]}</div>`;
 		}
 		html += `</div>`;
 
@@ -75,13 +80,14 @@ const Calculator = {
 
 		let strX = String(Math.abs(x));
 		let strY = String(Math.abs(y));
-		const maxLength = Math.max(strX.length, strY.length);
 
 		let digitsX = strX.split('').map(Number).reverse();
 		let digitsY = strY.split('').map(Number).reverse();
 		let resultDigits = [];
 		let carries = [];
 		let carry = 0;
+
+		const maxLength = Math.max(strX.length, strY.length);
 
 		for (let i = 0; i < maxLength; i++) {
 			const dX = digitsX[i] || 0;
@@ -108,11 +114,14 @@ const Calculator = {
 
 		const carryLine = adjustedCarries
 			.map(c => c || ' ')
-			.join('')
-			.padStart(finalResult.length - 1, ' ')
-			.split('');
+			.join('');
 
-		processElement.innerHTML = this.generateMathHTML('+', strX, strY, finalResult, carryLine);
+		// 💡 修正: maxCols の計算
+		// 加算では、X, Y, 結果の最大桁数を maxCols とする
+		const maxCols = Math.max(strX.length, strY.length, finalResult.length);
+
+		// 💡 修正: maxCols を generateMathHTML に渡す
+		processElement.innerHTML = this.generateMathHTML(maxCols, '+', strX, strY, finalResult, carryLine.split(''));
 	},
 
 	// ------------------------------------------------------------------
@@ -127,11 +136,23 @@ const Calculator = {
 
 		let strX = String(x);
 		let strY = String(y);
-		const maxLength = Math.max(strX.length, strY.length);
+
+		// 💡 修正: maxCols を X, Y, 結果の長さの最大値に設定する
+		const lenX = strX.length;
+		const lenY = strY.length;
+		const finalResultRaw = x - y;
+		const finalResult = String(finalResultRaw);
+		const lenR = finalResult.length;
+
+		// 筆算の幅は、X, Y, 結果の長さの最大値とする
+		const maxCols = Math.max(lenX, lenY, lenR);
+
+		const maxLength = Math.max(lenX, lenY);
 
 		let digitsX = strX.split('').map(Number);
 		let digitsY = strY.split('').map(Number);
 
+		// 桁数を揃える（計算ロジック用）
 		while (digitsX.length < maxLength) digitsX.unshift(0);
 		while (digitsY.length < maxLength) digitsY.unshift(0);
 
@@ -149,6 +170,7 @@ const Calculator = {
 				for (let j = i - 1; j >= 0; j--) {
 					if (modifiedDigitsX[j] > 0) {
 						modifiedDigitsX[j] -= 1;
+						// 繰り下げマークは、数字の上の桁に表示されるため、位置は一つ左
 						borrows[j] = '↓';
 						break;
 					} else {
@@ -160,17 +182,33 @@ const Calculator = {
 			resultDigits.unshift(dX - dY);
 		}
 
-		const rawFinalResult = resultDigits.join('');
-		const finalResult = String(parseInt(rawFinalResult, 10));
+		const rawFinalResultStr = resultDigits.join('');
 
+		// finalResult の長さに合わせて adjustedBorrows を調整
 		let adjustedBorrows = [];
+
+		// ゼロ詰めの数（digitsX, digitsY）と結果の数（finalResult）の長さの差
+		// 例: 100(3桁) - 88(2桁) = 12(2桁)。maxLength=3, lenR=2。diff=1。
 		const diff = maxLength - finalResult.length;
 
+		// adjustedBorrows の長さが finalResult の長さになるように調整し、
+		// 筆算の右端に合わせて左側にパディングを設ける
+		// (generateMathHTML内で、borrows.join('')が最大幅でパディングされる)
+
+		// borrows は maxLength の長さを持つ
+		// 例: [ , '↓', '↓']  ->  100 - 78 = 22
+		// 結果が '22' (2桁) なので、右端2桁の上の借り入れだけを使用
+
+		// borrows のうち、結果の桁数分だけを右側から抽出
+		const borrowSlice = borrows.slice(diff);
+
+		// adjustedBorrows は finalResult と同じ長さになり、各桁の上に対応
 		for (let i = 0; i < finalResult.length; i++) {
-			adjustedBorrows.push(borrows[i + diff] || '');
+			adjustedBorrows.push(borrowSlice[i] || '');
 		}
 
-		processElement.innerHTML = this.generateMathHTML('-', strX, strY, finalResult, adjustedBorrows);
+		// 💡 修正: maxCols を generateMathHTML に渡す
+		processElement.innerHTML = this.generateMathHTML(maxCols, '-', strX, strY, finalResult, adjustedBorrows);
 	},
 
 	// ------------------------------------------------------------------
@@ -185,13 +223,14 @@ const Calculator = {
 		let finalResult = String(x * y);
 
 		const maxLenY = strY.length;
-		const maxCols = finalResult.length;
+
+		// 💡 修正: maxCols を X, Y, 結果の長さの最大値に設定する
+		const maxCols = Math.max(strX.length, strY.length, finalResult.length);
 		const gridStyle = `style="--cols: ${maxCols}"`;
 
 		let html = '';
 
 		// 1. 最初の数 (X)
-		// ... [Xの行のHTML生成は変更なし] ...
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell"></div>`;
 		let paddedX = strX.padStart(maxCols, ' ');
@@ -202,7 +241,6 @@ const Calculator = {
 
 
 		// 2. 2番目の数 (Y) と演算子
-		// ... [Yの行のHTML生成は変更なし] ...
 		html += `<div class="math-row" ${gridStyle}>`;
 		html += `<div class="operator-cell">×</div>`;
 		let paddedY = strY.padStart(maxCols, ' ');
@@ -238,8 +276,6 @@ const Calculator = {
 		}
 
 		// 5. 最終線 (常に表示する)
-		// Yが1桁の場合、中間線はスキップされるため、この線が答えの直前の線になる。
-		// Yが多桁の場合、部分積の合計線になる。
 		html += `<div class="horizontal-line" ${gridStyle}><div class="operator-cell"></div><div class="line-area"></div></div>`;
 
 		// 6. 答えの行
@@ -256,7 +292,7 @@ const Calculator = {
 	},
 
 	// ------------------------------------------------------------------
-	// 途中式ロジック (割り算)
+	// 途中式ロジック (割り算) - 変更なし（前回の提案から安定化されているため）
 	// ------------------------------------------------------------------
 	showDivisionProcess(rowId, x, y) {
 		const processElement = document.getElementById(`process_${rowId}`);
@@ -719,5 +755,3 @@ const Calculator = {
 document.addEventListener('DOMContentLoaded', () => {
 	Calculator.init();
 });
-
-
